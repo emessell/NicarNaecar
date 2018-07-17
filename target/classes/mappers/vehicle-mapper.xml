@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.prj.nicarnaecar.dao.VehicleDAO">
+
+   <select id="VehicleList" resultType="VehicleVO">
+      select * from vehicle where vnumber != '지출'
+   </select>
+   <select id="VehicleListRecord" resultType="VehicleVO">
+   	select t2.*
+		from (select row_number() over (order by vmodel) as num, t1.*
+		from vehicle t1) t2
+		where num between #{startRecord} and #{endRecord}
+   </select>
+   
+   <select id="VehicleListCount" resultType="int">
+   	  select count(*) from vehicle
+   </select>
+   
+   <select id="SearchVehicleList" resultType="VehicleVO">
+		select t2.* from (select row_number() over (order by vmodel) as num, t1.*
+		from vehicle t1 where 
+			vmodel like '%'||#{search}||'%' or vmaker like '%'||#{search}||'%' or
+			vtype like '%'||#{search}||'%' or voil like '%'||#{search}||'%' or
+			vcolor like '%'||#{search}||'%' or eoffice like '%'||#{search}||'%' or
+			vstate like '%'||#{search}||'%'
+		) t2  
+   </select>
+   
+   <select id="SearchVehicleListCount" resultType="int">
+    	select count(*) from (select row_number() over (order by vmodel) as num, t1.*
+		from vehicle t1 where 
+			vmodel like '%'||#{search}||'%' or vmaker like '%'||#{search}||'%' or
+			vtype like '%'||#{search}||'%' or voil like '%'||#{search}||'%' or
+			vcolor like '%'||#{search}||'%' or eoffice like '%'||#{search}||'%' or
+			vstate like '%'||#{search}||'%'
+		) t2  
+   </select>
+   
+   
+   
+   
+   <insert id="insertVehicle">
+      insert into VEHICLE values 
+      (#{vnumber},#{vmaker},#{vmodel},#{vtype},#{vyear},
+      #{voil},#{vcolor},sysdate,#{eoffice},'대기',#{vprice},#{vkm})
+   </insert>
+   
+   <update id="updateVehicle">
+      update vehicle set
+      eoffice = #{eoffice},
+      vprice = #{vprice},
+      vkm = #{vkm} where vnumber = #{vnumber}
+   </update>
+   
+   <update id="deleteVehicle" parameterType="String">
+      update vehicle set
+      vstate = '폐차' where vnumber = #{vnumber}
+   </update>
+   
+ </mapper>  

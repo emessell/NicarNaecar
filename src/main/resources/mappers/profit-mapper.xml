@@ -1,0 +1,187 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.prj.nicarnaecar.dao.ProfitDAO">	
+	
+	<insert id="profitInsert" parameterType="ProfitVO">
+		insert into PROFIT(pnumber,ptarget,pinout,pamount,eemail,bnumber,pmemo)
+		values(profit_seq.nextval,#{ptarget},#{pinout},#{pamount},#{eemail},
+		<choose>
+			<when test='bnumber == null'>0</when>
+			<when test='bnumber != null'>#{bnumber}</when>
+		</choose>
+		,#{pmemo})
+	</insert>
+	
+	<delete id="profitDelete" parameterType="int">
+		delete from profit where pnumber=#{pnumber}
+	</delete>
+	
+	<select id="profitList"  resultType="ProfitVO">
+		select * from profit
+	</select>
+	
+	<select id="profitRecord" resultType="ProfitVO">
+		select t2.* from (select row_number() over (order by pnumber desc) as num, t1.* from profit t1) t2
+		where num between #{startRecord} and #{endRecord}
+	</select>
+	
+	<select id="profitCount" resultType="int">
+		select count(*) from profit
+	</select>
+	
+	<select id="profitDetail" resultType="ProfitVO">
+		select * from profit where bnumber=#{bnumber}
+	</select>
+	
+	<select id="profitFind" resultType="ProfitVO">
+		select t2.* from (select row_number() over (order by pnumber) as num, t1.*
+		from profit t1 where
+		
+		<choose>
+			<when test='option == "예약번호"'>
+				bnumber = #{search}
+			</when>
+			<when test='option == "거래내역"'>
+				pmemo = #{search}
+			</when>
+			<when test='option == "거래자"'>
+				eemail = #{search}
+			</when>
+		<otherwise>
+			bnumber = #{search} or pmemo = #{search} or eemail = #{search}
+		</otherwise>
+		</choose>
+			) t2 where num between #{startRecord} and #{endRecord}
+	</select>
+	
+	<select id="profitFindCount" resultType="int">
+		select count(*) from (select row_number() over (order by pnumber) as num, t1.*
+		from profit t1 where
+		
+		<choose>
+			<when test='option == "예약번호"'>
+				bnumber = #{search}
+			</when>
+			<when test='option == "거래내역"'>
+				pmemo = #{search}
+			</when>
+			<when test='option == "거래자"'>
+				eemail = #{search}
+			</when>
+		<otherwise>
+			bnumber = #{search} or pmemo = #{search} or eemail = #{search}
+		</otherwise>
+		</choose>
+			) t2 
+	</select>
+	
+	  <select id="profitChart" resultType="ProfitVO">
+SELECT APDATE AS APDATE, NVL(APAMOUNT,0) AS APAMOUNT, NVL(BPAMOUNT,0) AS BPAMOUNT, NVL(CPAMOUNT,0) AS CPAMOUNT, NVL(DPAMOUNT,0) AS DPAMOUNT 
+            FROM 
+            (SELECT PDATE AS APDATE, SUM(PAMOUNT) AS APAMOUNT 
+                FROM(SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-3),'YYYY-MM'))
+                        WHERE PMEMO IN ('예약', '예약취소') GROUP BY PDATE
+     ) A 
+LEFT OUTER JOIN
+    (SELECT PDATE AS BPDATE, SUM(PAMOUNT) AS BPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-3),'YYYY-MM'))
+        WHERE PMEMO IN ('주행비용') GROUP BY PDATE
+        ) B 
+ON A.APDATE = B.BPDATE 
+LEFT OUTER JOIN
+    (SELECT PDATE AS CPDATE, SUM(PAMOUNT) AS CPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-3),'YYYY-MM'))
+        WHERE PMEMO IN ('연체') GROUP BY PDATE
+    ) C
+ON A.APDATE = C.CPDATE
+LEFT OUTER JOIN
+    (SELECT PDATE AS DPDATE, SUM(PAMOUNT) AS DPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PINOUT, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-3),'YYYY-MM'))
+        WHERE PINOUT IN ('지출') GROUP BY PDATE
+    ) D
+ON A.APDATE = D.DPDATE
+
+UNION ALL
+
+SELECT APDATE AS PDATE, NVL(APAMOUNT,0) AS 예약, NVL(BPAMOUNT,0) AS 주행비용, NVL(CPAMOUNT,0) AS 연체, NVL(DPAMOUNT,0) AS 지출 
+            FROM 
+            (SELECT PDATE AS APDATE, SUM(PAMOUNT) AS APAMOUNT 
+                FROM(SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-2),'YYYY-MM'))
+                        WHERE PMEMO IN ('예약', '예약취소') GROUP BY PDATE
+     ) A 
+LEFT OUTER JOIN
+    (SELECT PDATE AS BPDATE, SUM(PAMOUNT) AS BPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-2),'YYYY-MM'))
+        WHERE PMEMO IN ('주행비용') GROUP BY PDATE
+        ) B 
+ON A.APDATE = B.BPDATE 
+LEFT OUTER JOIN
+    (SELECT PDATE AS CPDATE, SUM(PAMOUNT) AS CPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-2),'YYYY-MM'))
+        WHERE PMEMO IN ('연체') GROUP BY PDATE
+    ) C
+ON A.APDATE = C.CPDATE
+LEFT OUTER JOIN
+    (SELECT PDATE AS DPDATE, SUM(PAMOUNT) AS DPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PINOUT, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-2),'YYYY-MM'))
+        WHERE PINOUT IN ('지출') GROUP BY PDATE
+    ) D
+ON A.APDATE = D.DPDATE
+
+UNION ALL
+
+SELECT APDATE AS PDATE, NVL(APAMOUNT,0) AS 예약, NVL(BPAMOUNT,0) AS 주행비용, NVL(CPAMOUNT,0) AS 연체, NVL(DPAMOUNT,0) AS 지출 
+            FROM 
+            (SELECT PDATE AS APDATE, SUM(PAMOUNT) AS APAMOUNT 
+                FROM(SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-1),'YYYY-MM'))
+                        WHERE PMEMO IN ('예약', '예약취소') GROUP BY PDATE
+     ) A 
+LEFT OUTER JOIN
+    (SELECT PDATE AS BPDATE, SUM(PAMOUNT) AS BPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-1),'YYYY-MM'))
+        WHERE PMEMO IN ('주행비용') GROUP BY PDATE
+        ) B 
+ON A.APDATE = B.BPDATE 
+LEFT OUTER JOIN
+    (SELECT PDATE AS CPDATE, SUM(PAMOUNT) AS CPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-1),'YYYY-MM'))
+        WHERE PMEMO IN ('연체') GROUP BY PDATE
+    ) C
+ON A.APDATE = C.CPDATE
+LEFT OUTER JOIN
+    (SELECT PDATE AS DPDATE, SUM(PAMOUNT) AS DPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PINOUT, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,-1),'YYYY-MM'))
+        WHERE PINOUT IN ('지출') GROUP BY PDATE
+    ) D
+ON A.APDATE = D.DPDATE
+
+UNION ALL
+
+SELECT APDATE AS PDATE, NVL(APAMOUNT,0) AS 예약, NVL(BPAMOUNT,0) AS 주행비용, NVL(CPAMOUNT,0) AS 연체, NVL(DPAMOUNT,0) AS 지출 
+            FROM 
+            (SELECT PDATE AS APDATE, SUM(PAMOUNT) AS APAMOUNT 
+                FROM(SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,0),'YYYY-MM'))
+                        WHERE PMEMO IN ('예약', '예약취소') GROUP BY PDATE
+     ) A 
+LEFT OUTER JOIN
+    (SELECT PDATE AS BPDATE, SUM(PAMOUNT) AS BPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,0),'YYYY-MM'))
+        WHERE PMEMO IN ('주행비용') GROUP BY PDATE
+        ) B 
+ON A.APDATE = B.BPDATE 
+LEFT OUTER JOIN
+    (SELECT PDATE AS CPDATE, COALESCE(SUM(PAMOUNT), 0) AS CPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PMEMO, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,0),'YYYY-MM'))
+        WHERE PMEMO IN ('연체') GROUP BY PDATE
+    ) C
+ON A.APDATE = C.CPDATE
+LEFT OUTER JOIN
+    (SELECT PDATE AS DPDATE, SUM(PAMOUNT) AS DPAMOUNT FROM
+        (SELECT TO_CHAR(PDATE, 'YYYY-MM') AS PDATE, PINOUT, PAMOUNT FROM PROFIT WHERE TO_CHAR(PDATE, 'YYYY-MM') = TO_CHAR(add_months(sysdate,0),'YYYY-MM'))
+        WHERE PINOUT IN ('지출') GROUP BY PDATE
+    ) D
+ON A.APDATE = D.DPDATE
+	  </select> 
+</mapper>

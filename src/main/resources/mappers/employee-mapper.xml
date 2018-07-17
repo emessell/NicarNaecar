@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <!--   eemail,ename,ebirth;
+     ephone;
+     eaddress;
+    edate;
+     eoffice;
+     eposition;
+     estate; -->
+<mapper namespace="com.prj.nicarnaecar.dao.ELoginDAO">
+   <insert id="EInsert" parameterType="EmployeeVO">
+      insert into employee(eemail,epassword,ename,ebirth,ephone,eaddress,eoffice,eposition)
+      values(#{eemail}||'@ncnc.com',#{epassword},#{ename},#{ebirth},#{ephone},#{eaddress},#{eoffice},#{eposition})
+   </insert>
+   
+   <select id="EgetMember" resultType="EmployeeVO">
+      select * from employee where eemail=#{eemail}   
+   </select>
+   
+<!--    <update id="EUpdate">
+      update employee set
+         epassword    = #{epassword},
+         eaddress    = #{eaddress},
+         ephone       = #{ephone}
+      where eemail    = #{eemail}
+   </update> -->
+   
+   <update id="EUpdate">
+      update employee set
+         eoffice    = #{eoffice},
+         ename       = #{ename},
+         eposition  = #{eposition},
+         estate    = #{estate},
+        ephone    = #{ephone}
+      where eemail    = #{eemail}
+   </update>
+   
+   <select id="Efindid">
+      select eemail from employee where ename = #{ename} and ephone = #{ephone}
+   </select>
+   
+   <select id="Efindpw">
+      select epassword from employee where eemail = #{eemail} and ebirth = #{ebirth}
+   </select>
+   
+    <select id="EmemberList" resultType="EmployeeVO">
+      select eoffice,ename,eposition,estate,eemail,ephone,ebirth,edate 
+      from employee 
+     
+      order by eoffice, decode(eposition,'소장',1,'대리',2,'사원',3)
+   </select>
+   
+   <select id="EmemberRecord" resultType="EmployeeVO">
+      select t2.* from (select row_number() over (order by eoffice, decode(eposition,'소장',1,'대리',2,'사원',3)) as num, t1.* from employee t1
+       ) t2 where num between #{startRecord} and #{endRecord}
+   </select>
+   <select id="EmemberSearch" resultType="EmployeeVO">
+      select t2.* from (select row_number() over (order by eoffice, decode(eposition,'소장',1,'대리',2,'사원',3)) as num, t1.* from employee t1
+       <choose>
+      <when test="ename == null and oselect != null">
+            where eoffice = #{oselect}
+      </when>
+      <when test="oselect == null and ename != null">
+            where ename like '%'||#{ename}||'%'
+      </when>
+      <when test="oselect != null and ename != null">
+            where ename like '%'||#{ename}||'%' and eoffice = #{oselect}
+      </when>
+      </choose>
+      
+      ) t2
+      where num between #{startRecord} and #{endRecord}
+   </select>
+   
+   <select id="EmemberCount" resultType="int">
+         select count(*) from employee
+   </select>
+   
+   <select id="searchRec" resultType="int">
+         select count(*) from employee
+            <choose>
+      <when test="ename == null and oselect != null">
+            where eoffice = #{oselect}
+      </when>
+      <when test="oselect == null and ename != null">
+            where ename like '%'||#{ename}||'%'
+      </when>
+      <when test="oselect != null and ename != null">
+            where ename like '%'||#{ename}||'%' and eoffice = #{oselect}
+      </when>
+      </choose>
+   </select>
+   
+      <select id="eidCheck" resultType="int">
+   		select count(*) from employee where eemail = #{eemail}
+   </select>
+</mapper>

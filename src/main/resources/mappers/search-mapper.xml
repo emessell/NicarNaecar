@@ -1,0 +1,26 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.prj.nicarnaecar.dao.SearchDAO">	
+	<select id="AllVehicleList" resultType="VehicleVO">
+		select distinct vmodel, vtype, vmaker, voil, vcolor, vprice, vyear from vehicle where vmodel!='지출' and vstate != '폐차'
+	</select>
+	
+	<select id="dateVehicleList" resultType="VehicleVO">
+<!-- 		select * from vehicle where vehicle.vnumber not in (select booking.vnumber from booking
+		<![CDATA[where (bin <= TO_DATE(#{bin},'YYYY-MM-DD')
+   		OR  bout >=  TO_DATE(#{bout},'YYYY-MM-DD')]]>) and bstatus='예약') and eoffice=#{eoffice} -->
+   		
+   		select * from vehicle where vehicle.vnumber not in
+		(select booking.vnumber from booking where
+		<![CDATA[( (bin between TO_DATE(#{bin},'YYYY-MM-DD') and TO_DATE(#{bout},'YYYY-MM-DD') ) OR  (bout between TO_DATE(#{bin},'YYYY-MM-DD') and TO_DATE(#{bout},'YYYY-MM-DD') ) ) ]]>and bstatus='예약')
+		and eoffice=#{eoffice}
+	</select>
+	
+	<select id="reservationView" resultType="VehicleVO">
+		select * from vehicle where vnumber= #{vnumber}
+	</select>
+	
+	
+</mapper>

@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+    <mapper namespace="com.prj.nicarnaecar.dao.RepairDAO">
+       <select id="listAll" resultType="RepairVO">
+          select * from repair
+       </select>
+       <select id="totalRec" resultType="int">
+          select count(*) from repair
+       </select>
+       <select id="rsearchRec" resultType="int">
+         select count(*) from repair
+           where vnumber like '%'||#{search}||'%'
+             or bnumber like '%'||#{search}||'%'
+             or rshop like '%'||#{search}||'%'
+             or rmemo like '%'||#{search}||'%'
+             or rtarget like '%'||#{search}||'%'
+   </select>
+       <select id="repairlist" resultType="RepairVO">
+          select t2.* from (select row_number() over (order by rnumber desc) as num, t1.* from repair t1) t2
+      where num between #{startRecord} and #{endRecord}
+       </select>
+       <select id="repairsearch" resultType="RepairVO">
+          select t2.* from (select row_number() over (order by rnumber desc) as num, t1.* from repair t1
+             where vnumber like '%'||#{search}||'%'
+             or bnumber like '%'||#{search}||'%'
+             or rshop like '%'||#{search}||'%'
+             or rmemo like '%'||#{search}||'%'
+             or rtarget like '%'||#{search}||'%'
+          ) t2
+      where num between #{startRecord} and #{endRecord}
+       </select>
+       <select id="carList" resultType="VehicleVO">
+          select vnumber from vehicle where vnumber != '지출'
+       </select>
+       
+       <select id="bookList" resultType="BookingVO">
+          select bnumber, cemail from booking where vnumber = #{vnumber}
+       </select>
+       
+       <insert id="repairIn">
+          insert into repair(rnumber, vnumber, bnumber, rin, rout, rshop, rprice, rmemo, rtarget)
+          values(repair_seq.nextval,#{vnumber},#{bnumber},#{rin},#{rout},#{rshop},#{rprice},#{rmemo},#{rtarget})
+       </insert>
+       
+      <update id="toReparing">
+         update vehicle set
+            vstate = '수리'
+         where vnumber = #{vnumber}
+      </update>       
+      
+      <update id="toWaiting">
+         update vehicle set
+            vstate = '대기'
+         where vnumber = #{vnumber}
+      </update>
+       <update id="repairUp">
+          update repair set
+             rout = #{rout},
+             rmemo = #{rmemo}
+          where rnumber = #{rnumber}
+       </update>
+       <delete id="rdelete">
+          delete from repair where rnumber=#{rnumber}
+       </delete>
+       <update id="toComplete">
+          update repair set
+             rstate = '수리완료'
+          where rnumber = #{rnumber}
+       </update>
+    </mapper>

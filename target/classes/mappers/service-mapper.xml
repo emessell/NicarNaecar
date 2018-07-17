@@ -1,0 +1,67 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.prj.nicarnaecar.dao.ServiceDAO">	
+	<select id="noticeList" resultType="NoticeVO">
+		select * from notice order by nnumber desc
+	</select>
+	<select id="faqList" resultType="FaqVO">
+		select * from faq order by fnumber desc
+	</select>
+	<select id="noticeRecordList" resultType="NoticeVO">
+		select t2.* from (select row_number() over (order by nnumber desc) as num, t1.* from notice t1) t2
+		where num between #{startRecord} and #{endRecord}
+	</select>
+	<select id="faqRecordList" resultType="FaqVO">
+		select t2.* from (select row_number() over (order by fnumber desc) as num, t1.* from faq t1) t2
+		where num between #{startRecord} and #{endRecord}
+	</select>
+	<select id="noticeCount" resultType="int">
+		select count(*) from notice
+	</select>
+	<select id="faqCount" resultType="int">
+		select count(*) from faq
+	</select>
+	
+	
+	<select id="noticeView" parameterType="int" resultType="NoticeVO">
+		select * from notice where nnumber = #{nnumber}
+	</select>
+	<select id="faqView" parameterType="int" resultType="FaqVO">
+		select * from faq where fnumber = #{fnumber}
+	</select>
+	
+	
+	<update id="noticeModify" parameterType="NoticeVO">
+		update notice set
+			ntitle = #{ntitle},
+			ncontent = #{ncontent},
+			ncdate = sysdate
+		where nnumber 	= #{nnumber}	
+	</update>
+	
+	<update id="faqModify" parameterType="FaqVO">
+		update faq set
+			ftitle = #{ftitle},
+			fcontent = #{fcontent},
+			fcdate = sysdate
+		where fnumber 	= #{fnumber}	
+	</update>
+	
+	<delete id="noticeDelete">
+		delete from notice where nnumber = #{nnumber}
+	</delete>
+	
+	<delete id="faqDelete">
+		delete from faq where fnumber = #{fnumber}
+	</delete>
+	
+	<insert id="noticeInsert" parameterType="NoticeVO">
+		insert into notice(nnumber, eemail, ntitle, ncontent) values(notice_seq.nextval, #{eemail}, #{ntitle}, #{ncontent})
+	</insert>
+		
+	<insert id="faqInsert" parameterType="FaqVO">
+		insert into faq(fnumber, eemail, ftitle, fcontent) values(faq_seq.nextval, #{eemail}, #{ftitle}, #{fcontent})
+	</insert>
+</mapper>

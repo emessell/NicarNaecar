@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration
+    PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+	<settings>
+		<setting name="logImpl" value="SLF4J"/>
+	</settings>
+	
+	<typeAliases>
+		<typeAlias type="com.prj.nicarnaecar.vo.MemberVO" alias="MemberVO" />
+		<typeAlias type="com.prj.nicarnaecar.vo.LoginVO" alias="LoginVO" />
+		<typeAlias type="com.prj.nicarnaecar.vo.VehicleVO" alias="VehicleVO" />
+		<typeAlias type="com.prj.nicarnaecar.vo.BookingVO" alias="BookingVO" />
+		<typeAlias type="com.prj.nicarnaecar.vo.FaqVO" alias="FaqVO" />
+		<typeAlias type="com.prj.nicarnaecar.vo.NoticeVO" alias="NoticeVO" />
+		<typeAlias type="com.prj.nicarnaecar.vo.EmployeeVO" alias="EmployeeVO" />
+		<typeAlias type="com.prj.nicarnaecar.vo.ProfitVO" alias="ProfitVO" />
+		<typeAlias type="com.prj.nicarnaecar.vo.RepairVO" alias="RepairVO" />
+	</typeAliases>
+	
+</configuration>

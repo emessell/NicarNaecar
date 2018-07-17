@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.prj.nicarnaecar.dao.MemberDAO">	<!-- 인터페이스 이름 ,, 충돌방지용-->
+	<insert id="memberInsert" parameterType="MemberVO">
+		insert into customers(cemail,cpasswd,cname,cbirth,cphone)
+		values(#{cemail},#{cpasswd},#{cname},#{cbirth},#{cphone})
+	</insert>
+	
+	<select id="getMember" resultType="MemberVO">
+		select * from customers where cemail = #{cemail}
+	</select>
+	
+	<update id="memberUpdate">
+		update customers set
+			cpasswd 	= #{cpasswd},
+			cname 		= #{cname},
+			cbirth 		= #{cbirth},
+			cphone 		= #{cphone}
+		where cemail 	= #{cemail}
+	</update>
+	
+	<delete id = "memberDelete">
+		delete from customers where cemail = #{cemail}
+	</delete>
+	
+	<select id="findID" resultType="MemberVO">
+		select cemail from customers where cname = #{cname} and cphone = #{cphone}
+	</select>
+	
+	<select id="findPW" resultType="MemberVO">
+		select cpasswd from customers where cemail=#{cemail} and cbirth = #{cbirth}
+	</select>
+	
+	<select id="idCheck" resultType="int">
+		select count(*) from customers where cemail = #{cemail}
+	</select>
+</mapper>

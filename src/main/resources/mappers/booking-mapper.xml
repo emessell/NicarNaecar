@@ -1,0 +1,93 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper
+    PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+    "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.prj.nicarnaecar.dao.BookingDAO">	
+	<insert id="bookingInsert">
+		insert into booking(bnumber, vnumber, cemail, bin, bout, bprice, eoffice) values
+		(booking_seq.nextval, #{vnumber}, #{cemail}, #{bin}, #{bout}, #{bprice}, #{eoffice})
+	</insert>
+	
+	<update id="bookingModify">
+		update booking set
+			vnumber 	= #{vnumber},
+			bin 		= #{bin},
+			bout 		= #{bout},
+			bprice 		= #{bprice}
+		where bnumber 	= #{bnumber}
+	</update>
+	
+	<delete id="bookingDelete">
+		update booking set
+			bstatus = '취소'
+		where bnumber = #{bnumber}
+	</delete>
+	
+	<!-- 예약 전체보기 (개인) -->
+<!-- 	<select id="bookingView" resultType="BookingVO">
+		select * from booking where cemail = #{cemail} order by bnumber desc
+	</select> -->
+	<select id="bookingViewRecord" resultType="BookingVO">
+		select t2.* from (select row_number() over (order by bnumber desc) as num, t1.* from booking t1 where cemail =#{cemail}) t2
+		where num between #{startRecord} and #{endRecord}
+	</select>
+	<select id="bookingViewCount" parameterType="String" resultType="int">
+		select count(*) from booking where cemail = #{cemail}
+	</select>
+	
+	
+	<!-- 예약연장가능한날짜 출력 -->
+	<select id="bookingExtendView" resultType="String">
+		select to_date(bin-1,'yyyy-mm-dd') from booking 
+		where vnumber = #{vnumber} and bin > to_date(#{bout},'yyyy-mm-dd') and bstatus ='예약'
+	</select>
+	
+	<!-- 예약내역보기(1개) -->
+	<select id="getBookingInfo" resultType="BookingVO">
+		select * from booking where bnumber = #{bnumber}
+	</select>
+	
+	<!-- 예약하기 -->
+	<select id="bookingExtend" parameterType="BookingVO">
+		update booking set bout = #{bout}, bprice = #{bprice}
+		where bnumber = #{bnumber}
+	</select>
+	
+	<!-- 인도할 차량 -->
+	<select id="deliveryRecord" resultType="BookingVO">
+		select t2.* from (select row_number() over (order by bnumber desc) as num, t1.* from booking t1
+		where to_date(sysdate,'yyyy-mm-dd') <![CDATA[=]]> to_date(bin,'yyyy-mm-dd') and bstatus = '예약' ) t2
+		where num between #{startRecord} and #{endRecord}
+	</select>
+	<select id="deliveryCount" resultType="int">
+		select count(*) from booking where to_date(bin,'yyyy-mm-dd') = to_date(sysdate,'yyyy-mm-dd') and bstatus = '예약'
+	</select>
+	
+	<!-- 반납할 차량 -->
+	<select id="returnRecord" resultType="BookingVO">
+		select t2.* from (select row_number() over (order by bnumber desc) as num, t1.* from booking t1
+		where (to_date(sysdate,'yyyy-mm-dd') = to_date(bout,'yyyy-mm-dd') and bstatus = '사용중') OR bstatus = '연체') t2
+		where num between #{startRecord} and #{endRecord}
+	</select>
+	<select id="returnCount" resultType="int">
+		select count(*) from booking where (to_date(bout,'yyyy-mm-dd') = to_date(sysdate,'yyyy-mm-dd') and bstatus = '사용중') OR bstatus = '연체'
+	</select>
+	
+	<!-- 인도하기 -->
+	<update id="deliveryCar" parameterType="MAP">
+		update booking set bstatus='사용중', bdelivery=#{eemail},
+		vkm = (select vkm from vehicle where vnumber = (select vnumber from booking where bnumber = #{bnumber}))
+		where bnumber = #{bnumber}
+	</update>
+	
+	<!-- 반납하기 -->
+	<update id="returnCar">
+		update booking set bstatus='완료', bkm = #{bkm}, vnumber = #{vnumber}, breturn = #{breturn} 
+		where bnumber = #{bnumber}
+	</update>
+	
+	<!-- 예약 전 연체된 예약 유무 조회 -->
+	<select id="bookingCheck" resultType="int">
+		select count(*) from booking where cemail=#{cemail} and bstatus='연체'
+	</select>
+</mapper>

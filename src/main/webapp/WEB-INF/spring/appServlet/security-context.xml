@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans:beans xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:beans="http://www.springframework.org/schema/beans"
+	xmlns="http://www.springframework.org/schema/security"
+	xsi:schemaLocation="http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-4.2.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-4.2.xsd">
+
+	<!-- spring security 적용에서 제외 -->
+	
+	<http pattern="/resources/**" security="none"/>
+	<http pattern="/img/**" security="none"/>
+	<http pattern="/css/**" security="none"/>
+	<http pattern="/js/**" security="none"/>
+	
+	<!-- auto-config = "true" : 로그인페이지/http 기본인증/ 로그아웃 기능등을 제공 -->
+	<http auto-config="true" use-expressions="true">
+	<!-- login-page :  로그인 페이지 지정 속성,  authentication-failure-url : 로그인 실패시 이동페이지 지정  -->
+		<form-login login-page="/login/login" 
+		authentication-failure-url="/login/login?fail" />
+		<!-- login-processing-url="/j_spring_security_check"/> -->
+	
+ 		<!-- access="isAuthenticated()" : 인증된 사용자만 접근 -->
+		<intercept-url pattern="/admin/**" access="hasAuthority('ROLE_ADMIN')"/>
+		<intercept-url pattern="/reservation/**" access="isAuthenticated()"/>
+		<intercept-url pattern="/search/**" access="isAuthenticated()"/>
+		
+		<!-- access="permitAll" : 모든 접근 허용 -->
+		<intercept-url pattern="/login/**" access="permitAll"/>
+		<intercept-url pattern="/service/**" access="permitAll"/>
+		<intercept-url pattern="/member/**" access="permitAll"/>
+		<intercept-url pattern="/**" access="permitAll"/> 
+		
+		
+		<!-- 로그인 성공시 주소지정 -->
+		<form-login default-target-url="/" />
+		
+		<!-- 로그인 주소지정 및 로그아웃 성공시 주소지정 -->
+		<logout logout-url="/login/logout" logout-success-url="/login/login"
+		delete-cookies="true" invalidate-session="true" />
+		
+			<!-- 다중로그인 방지 -->	
+		<session-management>
+	   		<concurrency-control max-sessions="1" error-if-maximum-exceeded="true" />
+	   	</session-management>
+	</http>
+
+	<beans:bean id="encoder" class="org.springframework.security.crypto.password.NoOpPasswordEncoder" />
+	<beans:bean id="userService" class="com.prj.nicarnaecar.dao.LoginDAOImplSecurity"></beans:bean>
+	
+	<!-- <beans:bean id="EmployeeService" class="com.prj.nicarnaecar.dao.ELoginDAOImplSecurity"></beans:bean> -->
+
+	<authentication-manager>
+	<!-- <authentication-provider> -->
+			<!-- InMemoryDaoImpl방식
+			<user-service> 
+				<user name="guest" password="{noop}guest" authorities="ROLE_USER"/>
+				<user name="admin" password="{noop}admin" authorities="ROLE_ADMIN,ROLE_USER"/>
+			</user-service> -->
+			
+			<!-- JdbcDaoImpl방식	....root-context에서 servlet-context는 참조하지 못하지만 반대는 가능. 
+			<jdbc-user-service data-source-ref="dataSource"
+			users-by-username-query="select id,passwd, enable from member where id=?"
+			authorities-by-username-query="select t1.id, t2.role from member t1, user_role t2 where t1.id=t2.id and t1.id=?"/>
+		</authentication-provider> -->
+	
+		<!-- UserDetailsService 직접 커스터마이징한 구현 클래스 사용 -->
+		<authentication-provider user-service-ref="userService">
+			<password-encoder ref="encoder"></password-encoder>
+		</authentication-provider>
+	</authentication-manager>
+	
+<!-- 	<authentication-manager>
+      <authentication-provider user-service-ref="EmployeeService">
+         <password-encoder ref="encoder"></password-encoder>
+      </authentication-provider>
+   </authentication-manager> -->
+	
+</beans:beans>
