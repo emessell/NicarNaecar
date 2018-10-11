@@ -38,7 +38,7 @@ $(function() {
                 <tr>
                 	<td><button id="writeOK" class="btn btn-primary">작성하기</button></td>
                 	
-                	<td colspan="4" align="right"><a href="/service/notice" class="btn btn-primary">목록으로</a></td>
+                	<td colspan="4" align="right"><a href="/service/faq" class="btn btn-primary">목록으로</a></td>
                 </tr>
             </tbody>
         </table>

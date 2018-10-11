@@ -1,5 +1,5 @@
 <%@ page language="java" contentType="text/html; charset=UTF-8"
-	pageEncoding="UTF-8"%>
+   pageEncoding="UTF-8"%>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form"%>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core"%>
 <%-- <%@ taglib prefix="fmt" uri="http://java.sun.com/jsp/jstl/fmt" %>
@@ -14,28 +14,28 @@ function addComma(num) {
      return num.toString().replace(regexp, ',');
  }
 $(function() {
-	$("#cancelBtn").click(function() {
-		alert("예약이 취소되었습니다.");
-	});
+   $("#cancelBtn").click(function() {
+      alert("예약이 취소되었습니다.");
+   });
 });
 function detail(i) {
-	$.ajax( {
-		type : "GET",
-		url : "/detail/"+document.getElementsByName('bnumber')[i].value,
-		dataType : "JSON",
+   $.ajax( {
+      type : "GET",
+      url : "/detail/"+document.getElementsByName('bnumber')[i].value,
+      dataType : "JSON",
         success : function(data) {
-        	var str = "";
-        	$.each(data, function() {
-        		str += "<table><tr>";
-        		str += "<td><b>" + this.pmemo +"</b></td><td>" +addComma(this.pamount)+ "원<br></td>";
-        		str += "</tr></table>";
-        	})
-        	$(".modal-body").html(str);
+           var str = "";
+           $.each(data, function() {
+              str += "<table><tr>";
+              str += "<td style='width:80px;'><b style='font-weight:800;'>" + this.pmemo +"</b></td><td>" +addComma(this.pamount)+ "원<br></td>";
+              str += "</tr></table>";
+           })
+           $(".modal-body").html(str);
         },
         error : function(e) {
-        	console.log(e);
+           console.log(e);
         }
-	})
+   })
 }
 </script>
 </head>
@@ -72,22 +72,22 @@ function detail(i) {
                     <td>${book.vnumber }</td>
                     <td>${book.bin }</td>
                     <td>${book.bout }</td>
-		            <td>${book.bstatus }</td>
-		            <td>${book.eoffice }</td>
-		            <td>
-		                <c:choose>
-			               <c:when test='${book.bstatus eq "예약"}'>
-					           <a id="cancelBtn" href="/reservation/cancel/${book.bnumber }" class="btn btn-mdb-color btn-sm">취소</a>
-					       </c:when>
-					       <c:when test='${book.bstatus eq "사용중"}'>
-					           <a id="extendBtn" href="/reservation/extend/${book.bnumber }" class="btn btn-mdb-color btn-sm">연장</a>
-					       </c:when>
-				        </c:choose>
-                    </td>		                    
-		            <td>
-		               <input type="hidden" name="bnumber" value='${book.bnumber }' />
-		               <button class="btn btn-mdb-color btn-sm" data-toggle='modal' data-target='#detail' onClick="detail('${i.index}');">상세조회</button>
-		            </td>
+                  <td>${book.bstatus }</td>
+                  <td>${book.eoffice }</td>
+                  <td>
+                      <c:choose>
+                        <c:when test='${book.bstatus eq "예약"}'>
+                          <a id="cancelBtn" href="/reservation/cancel/${book.bnumber }" class="btn btn-mdb-color btn-sm">취소</a>
+                      </c:when>
+                      <c:when test='${book.bstatus eq "사용중"}'>
+                          <a id="extendBtn" href="/reservation/extend/${book.bnumber }" class="btn btn-mdb-color btn-sm">연장</a>
+                      </c:when>
+                    </c:choose>
+                    </td>                          
+                  <td>
+                     <input type="hidden" name="bnumber" value='${book.bnumber }' />
+                     <a class="btn btn-mdb-color btn-sm" data-toggle='modal' data-target='#detail' onClick="detail('${i.index}');">상세조회</a>
+                  </td>
                 </tr>
             </c:forEach>
             </tbody>

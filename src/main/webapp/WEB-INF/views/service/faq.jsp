@@ -46,9 +46,8 @@
 <button class="accordion animated rotateInUpRight">${faq.ftitle }</button>
 </c:if>
 <div class="panel">
+<br />
   <p>${faq.fcontent }</p>
-  <br />
-  <br />
   <sec:authorize access="hasRole('ROLE_ADMIN')">
         <a href="/service/faqModify/${faq.fnumber }">수정하기</a>
   </sec:authorize>
